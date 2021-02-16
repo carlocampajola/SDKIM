@@ -9,3 +9,5 @@ Requisites:
 - scipy.optimize and scipy.integrate
 
 The src/ folder contains the source code for the SDKIM model class, while the examples/ folder contains example codes for simulation and estimation.
+
+The code was developed in the Spyder IDE and is made for inline ipython execution. It can be easily translated to a jupyter notebook or an executable python script.
