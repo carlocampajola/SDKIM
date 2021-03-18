@@ -8,6 +8,7 @@ Python code for Score Driven Kinetic Ising Models
 
 import numpy as np  
 import torch
+import math
 from scipy.optimize import minimize_scalar
 from scipy.integrate import quad
 # import matplotlib.pyplot as plt
@@ -198,7 +199,10 @@ class k_ising_torch(object):
         return np.tanh(u + x*np.sqrt(delta))*np.exp(-x**2 / 2) / np.sqrt(2*np.pi)
     
     def integral(self, u, delta):
-        integ = quad(self.integrand, a=-np.inf, b=np.inf, args=(u,delta))[0]
+        if abs(u/math.sqrt(delta) > 4 or delta > 200):
+            integ = 1 - 2*math.erf(-u/math.sqrt(delta))
+        else:
+            integ = quad(self.integrand, a=-np.inf, b=np.inf, args=(u,delta))[0]
         return integ
                         
     def funct(self, u, delta, mi):
@@ -207,7 +211,7 @@ class k_ising_torch(object):
     def f2(self, x,u,delta):
         return (1 - np.tanh(u+x*np.sqrt(delta))**2) * np.exp(-x**2 / 2)/np.sqrt(2*np.pi)
     
-    def estimate_MS(self, s_T):
+    def estimate_MS(self, s_T, with_h=True, with_autocorr=True):
         T,N = s_T.shape
         m = torch.mean(s_T,0).data.numpy()
         s_Tnumpy = np.transpose(s_T.data.numpy())
@@ -216,7 +220,9 @@ class k_ising_torch(object):
         invC = np.linalg.inv(C)
         
         b = np.dot(D,invC)
-        infJ = np.zeros(N**2).reshape(N,N)
+        if not with_autocorr:
+            np.fill_diagonal(b, 0)
+        infJ = np.zeros((N,N))
         infh = np.zeros(N)
         
         for i in range(N):
@@ -225,25 +231,38 @@ class k_ising_torch(object):
             
             gamma = np.dot(np.square(bi), 1-np.square(m))
             
-            deltahat = 2
-            delta = 1
-            ite = 0
+            if i==0:
             
-            while (abs(delta-deltahat)/delta > 0.001):
-                ite += 1
-                delta = deltahat
+                deltahat = 2
+                delta = 1
+                ite = 0
+                while (abs(delta-deltahat)/delta > 0.001):
+                    ite += 1
+                    delta = deltahat
                 
+                    u = minimize_scalar(self.funct, args=(delta, mi), method='brent').x
+                
+                    a = quad(self.f2, a=-np.inf, b=np.inf, args=(u, delta))[0]
+                #print(a)
+                    if a == 0:
+                        raise Exception("got a = 0")
+                    
+                    deltahat = gamma/a**2
+                        
+            else:
                 u = minimize_scalar(self.funct, args=(delta, mi), method='brent').x
-                
                 a = quad(self.f2, a=-np.inf, b=np.inf, args=(u, delta))[0]
-                
-                deltahat = gamma/a**2
             
             infJ[i,:] = bi/a
             g = np.dot(infJ[i,:], m)
-            infh[i] = u - g
+            if with_h:
+                infh[i] = u - g
             
         return infJ, infh
+    
+    def estimate_MS_nonstat(self, s_T, with_h=True):
+        T,N,N_sample = s_T.shape
+        
 
     def loglik_tot(self, s_T, J, extfields, covcouplings, covariates_t):
         logl_T = 0
