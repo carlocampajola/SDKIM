@@ -282,7 +282,7 @@ class k_ising_torch(object):
         maxlik = self.loglik_tot(s_T, J, extfields, covcouplings, covariates_t)
         indlik = self.loglik_tot(s_T, emptyJ, extfields, covcouplings, covariates_t)
         npJ = torch.clone(J).data.numpy()
-        sorted_npJ_idx = np.dstack(np.unravel_index(np.argsort(npJ.ravel()), (N,N)))
+        sorted_npJ_idx = np.dstack(np.unravel_index(np.argsort(np.abs(npJ.ravel())), (N,N)))
         k = cancidx = 0
         cancellation_sched = [0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
         cancelled = np.floor(np.cumsum(np.multiply(cancellation_sched,N**2)))
