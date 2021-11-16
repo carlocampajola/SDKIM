@@ -215,8 +215,8 @@ class k_ising_torch(object):
         T,N = s_T.shape
         m = torch.mean(s_T,0).data.numpy()
         s_Tnumpy = np.transpose(s_T.data.numpy())
-        C = np.corrcoef(s_Tnumpy)
-        D = np.corrcoef(s_Tnumpy[:,1:], s_Tnumpy[:,:(T-1)])[:N,N:]
+        C = np.cov(s_Tnumpy)
+        D = np.cov(s_Tnumpy[:,1:], s_Tnumpy[:,:(T-1)])[:N,N:]
         invC = np.linalg.inv(C)
         
         b = np.dot(D,invC)
