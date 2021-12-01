@@ -199,7 +199,7 @@ class k_ising_torch(object):
         return np.tanh(u + x*np.sqrt(delta))*np.exp(-x**2 / 2) / np.sqrt(2*np.pi)
     
     def integral(self, u, delta):
-        if abs(u/math.sqrt(delta) > 4 or delta > 200):
+        if abs(u/math.sqrt(delta) > 4) or delta > 200:
             integ = 1 - 2*math.erf(-u/math.sqrt(delta))
         else:
             integ = quad(self.integrand, a=-np.inf, b=np.inf, args=(u,delta))[0]
@@ -259,9 +259,6 @@ class k_ising_torch(object):
                 infh[i] = u - g
             
         return infJ, infh
-    
-    def estimate_MS_nonstat(self, s_T, with_h=True):
-        T,N,N_sample = s_T.shape
         
 
     def loglik_tot(self, s_T, J, extfields, covcouplings, covariates_t):
