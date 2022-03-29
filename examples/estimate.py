@@ -61,10 +61,10 @@ for sam in range(N_sample):
 
     unc_mean_est = model.estimate_const_beta(s_T_samp, J_est, extfields_est, covariates_T, covcouplings, lr=0.05, Steps=300)
 
-    sdd_est = model.estimate_targeted(unc_mean_est, s_T_samp, J_est, extfields_est, covariates_T, covcouplings, lr=0.15, Steps=300, 
+    sdd_est = model.estimate_targeted(unc_mean_est, s_T_samp, J_est, extfields_est, covariates_T, covcouplings, lr=0.1, Steps=300, 
                                       rel_improv_tol = 5e-9)
         
     f_T_est = model.filter_dyn_par(s_T_samp, J_est, extfields_est, sdd_est, covariates_T, covcouplings)
 
     plt.plot(torch.exp(f_T_samp).data.numpy())
-    plt.plot(torch.exp(f_T_est-torch.mean(f_T_est)).data.numpy())        
+    plt.plot(torch.exp(f_T_est-torch.mean(f_T_est, 0)).data.numpy())        

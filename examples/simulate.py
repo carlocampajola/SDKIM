@@ -39,9 +39,9 @@ np.random.seed(1234)
 # set number of spins
 N = 30
 # set number of samples
-N_sample = 60
+N_sample = 1
 # set sample length
-T = 3000
+T = 500
 
 # random J matrix with Gaussian distributed values
 J_static_np = np.random.normal(loc = 0/np.sqrt(N), scale = (1/np.sqrt(N)), size = (N,N))
@@ -52,8 +52,8 @@ s0_np =  2* np.random.binomial(1,0.5,N) -1# ones(N)
 s0 = torch.tensor(s0_np, dtype=dtype)
 
 # h parameters (extfields), can be set to 0 or any value
-extfields =  model.tens(np.zeros(N))
-# extfields = test.tens(np.random.normal(loc = 0, scale = 1/np.sqrt(N), size = N))
+#extfields =  model.tens(np.zeros(N))
+extfields = model.tens(np.random.normal(loc = 0, scale = 1/np.sqrt(N), size = N))
 
 # covariates time series and coupling parameters of covariates (defaults to all zeros)
 covariates_T =torch.zeros(T, 1)
@@ -64,7 +64,8 @@ sdd_pars = model.reasonable_pars
 
 npar = sdd_pars.shape[0]
 s_T = np.zeros((T, N, N_sample))
-f_T = scores = np.zeros((T, npar, N_sample))
+f_T = np.zeros((T, npar, N_sample))
+scores = np.zeros((T, npar, N_sample))
 
 for sam in range(N_sample):
     # simulate the model - outputs are the simulated score-driven parameters, the simulated spins and the time series of the score
@@ -76,7 +77,7 @@ for sam in range(N_sample):
     scores[:,:,sam] = score_T.data.numpy()
 # plot one trajectory
 plt.plot(torch.exp(f_T_sampled).data.numpy())
-plt.plot(torch.mean(s_T_samp,1).data.numpy())
+#plt.plot(torch.mean(s_T_samp,1).data.numpy())
 
 # save trajectory for future estimations
 np.savez('example_simulation.npz', f_T=f_T, s_T=s_T, J=J_static_np, h=extfields.data.numpy(),

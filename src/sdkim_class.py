@@ -30,7 +30,7 @@ class beta_tv_torch(k_ising_torch):
     def __init__(self, beta_scal_inds = torch.eye(5)):
         k_ising_torch.__init__(self)
         npar = beta_scal_inds.shape[0]
-        self.reasonable_pars = torch.tensor([0,0.95,0.04],requires_grad = True).repeat(1,npar).view(-1,3) #  for testing dgp or opt starting points
+        self.reasonable_pars = torch.tensor([0,0.95,0.01],requires_grad = True).repeat(1,npar).view(-1,3) #  for testing dgp or opt starting points
         self.opt_start_pars =  self.reasonable_pars
         self.beta_scal_inds = beta_scal_inds
 
