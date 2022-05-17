@@ -50,11 +50,25 @@ class beta_tv_torch(k_ising_torch):
             inds = inds_0[torch.where(inds_0[:,4] == 0)[0],:]
             
         k = J.shape[0]
-        J = J.clone()*torch.eye(k)* torch.matmul(beta,inds)[0]\
-        + J.clone()*(torch.ones((k,k)) - torch.eye(k))*torch.matmul(beta,inds)[1]
         
-        extfields = extfields.clone() * torch.matmul(beta,inds)[2]
-        covcouplings = covcouplings.clone() * torch.matmul(beta,inds)[3]
+        if any(inds[:,0]):
+            Jd = J.clone() * torch.eye(k) * torch.matmul(beta,inds)[0]
+        else:
+            Jd = J.clone() * torch.eye(k)
+        if any(inds[:,1]):
+            Jo = J.clone() *(torch.ones((k,k)) - torch.eye(k)) * torch.matmul(beta,inds)[1]
+        else:
+            Jo = J.clone() *(torch.ones((k,k)) - torch.eye(k))
+            
+        J = Jd + Jo
+        #J = J.clone()*torch.eye(k)* torch.matmul(beta,inds)[0]\
+        #+ J.clone()*(torch.ones((k,k)) - torch.eye(k))*torch.matmul(beta,inds)[1]
+        
+        if any(inds[:,2]):
+            extfields = extfields.clone() * torch.matmul(beta,inds)[2]
+        
+        if any(inds[:,3]):
+            covcouplings = covcouplings.clone() * torch.matmul(beta,inds)[3]
         
         return J, extfields, covcouplings
     
